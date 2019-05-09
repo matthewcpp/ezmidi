@@ -77,16 +77,16 @@ void ezmidi_destroy(ezmidi* context)
 	delete coremidi;
 }
 
-void ezmidi_get_source_count(ezmidi* context, int* source_count)
+int ezmidi_get_source_count(ezmidi* context)
 {
-	*source_count = MIDIGetNumberOfSources();
+	return MIDIGetNumberOfSources();
 }
 
 std::string get_source_property(MIDIEndpointRef midi_source, CFStringRef property_name)
 {
 	CFStringRef cf_string;
 	char property_buffer[64];
-	MIDIObjectGetStringProperty(midi_source, kMIDIPropertyName, &cf_string);
+	MIDIObjectGetStringProperty(midi_source, property_name, &cf_string);
 	CFStringGetCString(cf_string, property_buffer, sizeof(property_buffer), 0);
 	CFRelease(cf_string);
 	
@@ -101,26 +101,37 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 	
 	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
 	MIDIEndpointRef midi_source = MIDIGetSource(source_index);
-	
-	std::string manufacturer = get_source_property(midi_source, kMIDIPropertyManufacturer);
-	std::string name = get_source_property(midi_source, kMIDIPropertyName);
+    
+    std::string manufacturer = get_source_property(midi_source, kMIDIPropertyManufacturer);
 	std::string model = get_source_property(midi_source, kMIDIPropertyModel);
-	
-	std::ostringstream stream;
-	stream << manufacturer << ';' << name << ';' << model;
-	
-	coremidi->return_data = stream.str();
-	return std::any_cast<std::string>(coremidi->return_data).c_str();
+    
+    std::string result = manufacturer;
+    if (!model.empty()) {
+        if (!result.empty())result.append(" ");
+        result.append(model);
+    }
+    
+    if (!result.empty()) {
+        coremidi->return_data = result;
+    }
+    else {
+        coremidi->return_data = get_source_property(midi_source, kMIDIPropertyModel);
+    }
+	return std::any_cast<std::string&>(coremidi->return_data).c_str();
 }
 
 void ezmidi_connect_source(ezmidi* context, int source)
 {
+    if (source < 0 || source >= MIDIGetNumberOfSources()) {
+        return;
+    }
+    
 	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
 	
 	MIDIEndpointRef midi_source = MIDIGetSource(source);
 	
 	if (midi_source != 0) {
-		MIDIPortConnectSource(coremidi->midi_port, src, &src); // todo: handle for identifying connections?
+		MIDIPortConnectSource(coremidi->midi_port, midi_source, nullptr); // todo: handle for identifying connections?
 	}
 	else {
 		std::cout << "Error connecting source" << std::endl;
