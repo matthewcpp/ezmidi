@@ -16,7 +16,7 @@ elseif (WIN32)
 	set(ezmidi_source ${ezmidi_source} src/windows.cpp)
 endif()
 
-add_library(ezmidi ${ezmidi_source})
+add_library(ezmidi SHARED ${ezmidi_source})
 set_property(TARGET ezmidi PROPERTY CXX_STANDARD 17)
 target_include_directories(ezmidi PUBLIC include)
 

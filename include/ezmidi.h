@@ -1,6 +1,10 @@
 #ifndef EZ_MIDI_H
 #define EZ_MIDI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct ezmidi;
 
 typedef enum {
@@ -33,4 +37,8 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index);
 void ezmidi_connect_source(ezmidi* context, int source);
 int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event);
 
+#ifdef __cplusplus
+}
+#endif
+    
 #endif
