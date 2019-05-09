@@ -8,6 +8,7 @@ set(ezmidi_source
 	src/event.h 
 	src/event.cpp 
 	src/midi.h
+	src/common.cpp
 )
 
 if (APPLE)

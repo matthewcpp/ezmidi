@@ -8,11 +8,18 @@
 #include <string>
 #include <sstream>
 
+// MRL 05/09/2019
+// Note that there appears to be a bug when calling MIDIClientCreate from within a bundle
+// The method can potentially fail with an error code of -50.
+// Discussion from RtMidi issue page: https://github.com/thestk/rtmidi/issues/155
+// Workaround is to open MIDIMonitor in the background before calling MIDIClientCreate from bundle: https://www.snoize.com/MIDIMonitor/
+
 struct ez_coremidi {
 	MIDIClientRef midi_client = NULL;
 	MIDIPortRef midi_port = NULL;
 	Ezmidi::EventQueue event_queue;
 	std::any return_data;
+    Ezmidi_Config config;
 };
 
 void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnRefCon)
@@ -38,23 +45,35 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 	
 }
 
-ezmidi* ezmidi_create()
+void log_error(ez_coremidi* coremidi, const char* method, OSStatus status)
+{
+    if (coremidi->config.log_func) {
+        std::ostringstream s;
+        s << method << " failed: " << status;
+        coremidi->config.log_func(s.str().c_str());
+    }
+}
+
+ezmidi* ezmidi_create(Ezmidi_Config* config)
 {
 	auto* coremidi = new ez_coremidi();
+    if (config)
+        coremidi->config = *config;
+    else
+        ezmidi_config_init(&coremidi->config);
 	
-	OSStatus error = MIDIClientCreate(CFSTR("client"), nullptr, nullptr, &coremidi->midi_client);
+	OSStatus error = MIDIClientCreate(CFSTR("coremidi_client"), nullptr, nullptr, &coremidi->midi_client);
 	if (error) {
-		std::cout << "Error creating client" << error << std::endl;
+        log_error(coremidi, "MIDIClientCreate", error);
 		ezmidi_destroy(reinterpret_cast<ezmidi*>(coremidi));
-		
 		return NULL;
 	}
 	
-	error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("Input port"), midiReadProc, coremidi, &coremidi->midi_port);
-	
+	error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("coremidi_port"), midiReadProc, coremidi, &coremidi->midi_port);
 	if (error) {
-		std::cout << "Error creating Port" << error << std::endl;
-		ezmidi_destroy(reinterpret_cast<ezmidi*>(coremidi));
+        log_error(coremidi, "MIDIInputPortCreate", error);
+        MIDIClientDispose(coremidi->midi_client);
+        delete coremidi;
 		
 		return NULL;
 	}
@@ -66,12 +85,9 @@ void ezmidi_destroy(ezmidi* context)
 {
 	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
 	
-	if (coremidi->midi_port){
-		MIDIPortDispose(coremidi->midi_port);
-	}
-	
 	if (coremidi->midi_client) {
-		MIDIClientDispose(coremidi->midi_client);
+		OSStatus error = MIDIClientDispose(coremidi->midi_client);
+        if (error)  log_error(coremidi, "MIDIClientDispose", error);
 	}
 	
 	delete coremidi;
@@ -131,10 +147,11 @@ void ezmidi_connect_source(ezmidi* context, int source)
 	MIDIEndpointRef midi_source = MIDIGetSource(source);
 	
 	if (midi_source != 0) {
-		MIDIPortConnectSource(coremidi->midi_port, midi_source, nullptr); // todo: handle for identifying connections?
+		OSStatus error = MIDIPortConnectSource(coremidi->midi_port, midi_source, nullptr); // todo: handle for identifying connections?
+        if (error) log_error(coremidi, "MIDIPortConnectSource", error);
 	}
 	else {
-		std::cout << "Error connecting source" << std::endl;
+		log_error(coremidi, "MIDIGetSource", 0);
 	}
 }
 
