@@ -27,8 +27,8 @@ typedef union {
 ezmidi* ezmidi_create();
 void ezmidi_destroy(ezmidi* context);
 
-void ezmidi_get_source_count(int* source_count);
-const char* ezmidi_get_source_info(int source_index);
+int ezmidi_get_source_count(ezmidi* context);
+const char* ezmidi_get_source_name(ezmidi* context, int source_index);
 
 void ezmidi_connect_source(ezmidi* context, int source);
 int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event);

@@ -93,7 +93,7 @@ std::string get_source_property(MIDIEndpointRef midi_source, CFStringRef propert
 	return std::string(property_buffer);
 }
 
-const char* ezmidi_get_source_info(ezmidi* context, int source_index)
+const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 {
 	int source_count = MIDIGetNumberOfSources();
 	if (source_index < 0 || source_index >= source_count)
