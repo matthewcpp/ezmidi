@@ -2,7 +2,7 @@
 
 namespace Midi {
 
-	// reference: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
+// reference: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
 enum Status {
 	NoteOffChannel1 = 128,
 	NoteOffChannel16 = 143,
@@ -20,5 +20,4 @@ inline bool isNoteEvent(int status) {
 	return status >= Status::NoteOffChannel1 && status <= Status::NoteOnChannel16;
 }
 
-	
 }
