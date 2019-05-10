@@ -5,11 +5,11 @@
 #include <chrono>
 
 int main (int argc, char** argv)
-{
-	ezmidi* ezmidi = ezmidi_create();
+{    
+	ezmidi* ezmidi = ezmidi_create(nullptr);
 
 	int source_count = ezmidi_get_source_count(ezmidi);
-
+    
 	if (source_count == 0) {
 		std::cout << "No MIDI sources available" << std::endl;
 		return 1;
