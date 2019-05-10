@@ -25,6 +25,7 @@ if (APPLE)
 	target_link_libraries(ezmidi PUBLIC "-framework CoreMIDI" "-framework CoreFoundation")
 elseif(WIN32)
 	target_link_libraries(ezmidi PUBLIC Winmm.lib)
+    target_compile_definitions(ezmidi PRIVATE BUILD_EZMIDI_DLL)
 endif()
 
 

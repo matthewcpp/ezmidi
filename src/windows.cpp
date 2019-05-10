@@ -11,6 +11,7 @@ struct Ezmidi_Windows
 	HMIDIIN input_handle;
 	Ezmidi::EventQueue event_queue;
 	std::any return_data;
+	Ezmidi_Config config;
 };
 
 #define LOW_BYTE 0x000000FF
@@ -33,9 +34,14 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	}
 }
 
-ezmidi* ezmidi_create()
+ezmidi* ezmidi_create(Ezmidi_Config* config)
 {
 	auto midi_lib = new Ezmidi_Windows{};
+
+	if (config)
+		midi_lib->config = *config;
+	else
+		ezmidi_config_init(&midi_lib->config);
 
 	return reinterpret_cast<ezmidi*>(midi_lib);
 }
@@ -55,7 +61,6 @@ int ezmidi_get_source_count(ezmidi* context)
 {
 	return static_cast<int>(midiInGetNumDevs());
 }
-
 
 const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 {
