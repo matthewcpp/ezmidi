@@ -18,14 +18,11 @@ void EventQueue::pushNote(int status, int key, int velocity)
 		event.note_event.detail = EZMIDI_NOTEEVENT_OFF;
 	}
 	
-	std::lock_guard<std::mutex> lock(event_mutex);
 	event_queue.push(event);
 }
 
 int EventQueue::pumpEvents(Ezmidi_Event& event)
-{
-	std::lock_guard<std::mutex> lock(event_mutex);
-	
+{	
 	if (!event_queue.empty()) {
 		event = event_queue.front();
 		event_queue.pop();

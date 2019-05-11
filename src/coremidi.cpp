@@ -50,7 +50,7 @@ void log_error(ez_coremidi* coremidi, const char* method, OSStatus status)
     if (coremidi->config.log_func) {
         std::ostringstream s;
         s << method << " failed: " << status;
-        coremidi->config.log_func(s.str().c_str());
+        coremidi->config.log_func(s.str().c_str(), coremidi->config.user_data);
     }
 }
 
