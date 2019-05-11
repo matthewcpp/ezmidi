@@ -38,10 +38,11 @@ typedef union {
 	Ezmidi_NoteEvent note_event;
 } Ezmidi_Event;
     
-typedef void(*Ezmidi_LogFunc)(const char* message);
+typedef void(*Ezmidi_LogFunc)(const char* message, void* user_data);
     
 typedef struct {
     Ezmidi_LogFunc log_func;
+	void* user_data;
 } Ezmidi_Config;
 
 EZMIDI_API ezmidi* ezmidi_create(Ezmidi_Config* config);

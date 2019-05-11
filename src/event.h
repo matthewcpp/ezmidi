@@ -13,7 +13,6 @@ public:
 	int pumpEvents(Ezmidi_Event& event);
 	
 private:
-	std::mutex event_mutex;
 	std::queue<Ezmidi_Event> event_queue;
 };
 	

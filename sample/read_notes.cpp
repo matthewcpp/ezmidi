@@ -4,9 +4,15 @@
 #include <thread>
 #include <chrono>
 
+void log_message(const char* message, void* user_data);
+
 int main (int argc, char** argv)
 {    
-	ezmidi* ezmidi = ezmidi_create(nullptr);
+	Ezmidi_Config config;
+	ezmidi_config_init(&config);
+	config.log_func = log_message;
+
+	ezmidi* ezmidi = ezmidi_create(&config);
 
 	int source_count = ezmidi_get_source_count(ezmidi);
     
@@ -49,4 +55,9 @@ int main (int argc, char** argv)
 	ezmidi_destroy(ezmidi);
 
 	return 0;
+}
+
+void log_message(const char* message, void* user_data)
+{
+	std::cout << "ezmidi log message: " << message << std::endl;
 }
