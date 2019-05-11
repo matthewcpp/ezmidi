@@ -54,8 +54,6 @@ int main (int argc, char** argv)
 	std::cout << "Shutting down ezmidi" << std::endl;
 	ezmidi_destroy(ezmidi);
 
-	std::cin.get();
-
 	return 0;
 }
 

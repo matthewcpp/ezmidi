@@ -7,6 +7,7 @@
 #include <any>
 #include <string>
 #include <sstream>
+#include <mutex>
 
 // MRL 05/09/2019
 // Note that there appears to be a bug when calling MIDIClientCreate from within a bundle
@@ -19,6 +20,7 @@ struct ez_coremidi {
 	MIDIPortRef midi_port = NULL;
 	Ezmidi::EventQueue event_queue;
 	std::any return_data;
+    std::mutex mutex;
     Ezmidi_Config config;
 };
 
@@ -37,6 +39,8 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 		else if (Midi::isNoteEvent(midiStatus)) {
 			int noteNumber = packet->data[1];
 			int velocity = packet->data[2];
+            
+            std::lock_guard<std::mutex>(coremidi->mutex);
 			coremidi->event_queue.pushNote(midiStatus, noteNumber, velocity);
 		}
 
@@ -54,6 +58,22 @@ void log_error(ez_coremidi* coremidi, const char* method, OSStatus status)
     }
 }
 
+// Disposing of a midi client will also clean up all it's ports.
+void close_existing_connection(ez_coremidi* coremidi)
+{
+    if (coremidi->midi_client) {
+        if (coremidi->config.log_func) {
+            coremidi->config.log_func("closing existing connection", coremidi->config.user_data);
+        }
+        
+        OSStatus error = MIDIClientDispose(coremidi->midi_client);
+        if (error)  log_error(coremidi, "MIDIClientDispose", error);
+        
+        coremidi->midi_port = NULL;
+        coremidi->midi_client = NULL;
+    }
+}
+
 ezmidi* ezmidi_create(Ezmidi_Config* config)
 {
 	auto* coremidi = new ez_coremidi();
@@ -62,33 +82,16 @@ ezmidi* ezmidi_create(Ezmidi_Config* config)
     else
         ezmidi_config_init(&coremidi->config);
 	
-	OSStatus error = MIDIClientCreate(CFSTR("coremidi_client"), nullptr, nullptr, &coremidi->midi_client);
-	if (error) {
-        log_error(coremidi, "MIDIClientCreate", error);
-		ezmidi_destroy(reinterpret_cast<ezmidi*>(coremidi));
-		return NULL;
-	}
-	
-	error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("coremidi_port"), midiReadProc, coremidi, &coremidi->midi_port);
-	if (error) {
-        log_error(coremidi, "MIDIInputPortCreate", error);
-        MIDIClientDispose(coremidi->midi_client);
-        delete coremidi;
-		
-		return NULL;
-	}
-	
 	return reinterpret_cast<ezmidi*>(coremidi);
 }
 
 void ezmidi_destroy(ezmidi* context)
 {
 	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
-	
-	if (coremidi->midi_client) {
-		OSStatus error = MIDIClientDispose(coremidi->midi_client);
-        if (error)  log_error(coremidi, "MIDIClientDispose", error);
-	}
+    {
+        std::lock_guard<std::mutex>(coremidi->mutex);
+        close_existing_connection(coremidi);
+    }
 	
 	delete coremidi;
 }
@@ -138,11 +141,34 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 
 void ezmidi_connect_source(ezmidi* context, int source)
 {
+	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+    
+    std::lock_guard<std::mutex>(coremidi->mutex);
     if (source < 0 || source >= MIDIGetNumberOfSources()) {
         return;
     }
     
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+    close_existing_connection(coremidi);
+    
+    if (coremidi->config.log_func) {
+        coremidi->config.log_func("opening connection", coremidi->config.user_data);
+    }
+    
+    OSStatus error = MIDIClientCreate(CFSTR("coremidi_client"), nullptr, nullptr, &coremidi->midi_client);
+    if (error) {
+        log_error(coremidi, "MIDIClientCreate", error);
+        ezmidi_destroy(reinterpret_cast<ezmidi*>(coremidi));
+        return;
+    }
+    
+    error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("coremidi_port"), midiReadProc, coremidi, &coremidi->midi_port);
+    if (error) {
+        log_error(coremidi, "MIDIInputPortCreate", error);
+        MIDIClientDispose(coremidi->midi_client);
+        delete coremidi;
+        
+        return;
+    }
 	
 	MIDIEndpointRef midi_source = MIDIGetSource(source);
 	

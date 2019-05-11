@@ -64,9 +64,8 @@ ezmidi* ezmidi_create(Ezmidi_Config* config)
 void ezmidi_destroy(ezmidi* context)
 {
 	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(context);
-
-	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 	{
+		std::lock_guard<std::mutex> lock(midi_lib->mutex);
 		close_existing_connection(midi_lib);
 	}
 	
