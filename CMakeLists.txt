@@ -15,6 +15,8 @@ if (APPLE)
 	set(ezmidi_source ${ezmidi_source} src/coremidi.cpp)
 elseif (WIN32)
 	set(ezmidi_source ${ezmidi_source} src/windows.cpp)
+else()
+	set(ezmidi_source ${ezmidi_source} src/alsa.cpp)
 endif()
 
 add_library(ezmidi SHARED ${ezmidi_source})
@@ -26,6 +28,9 @@ if (APPLE)
 elseif(WIN32)
 	target_link_libraries(ezmidi PUBLIC Winmm.lib)
     target_compile_definitions(ezmidi PRIVATE BUILD_EZMIDI_DLL)
+else()
+	find_package(Threads REQUIRED)
+	target_link_libraries(ezmidi PUBLIC "-lasound" Threads::Threads)
 endif()
 
 

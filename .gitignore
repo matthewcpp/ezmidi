@@ -33,3 +33,6 @@
 
 # Cmake in source build folder
 build
+
+#jetbrains
+.idea
