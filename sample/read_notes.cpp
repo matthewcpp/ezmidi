@@ -7,7 +7,7 @@
 void log_message(const char* message, void* user_data);
 
 int main (int argc, char** argv)
-{    
+{
 	Ezmidi_Config config;
 	ezmidi_config_init(&config);
 	config.log_func = log_message;
@@ -15,7 +15,7 @@ int main (int argc, char** argv)
 	ezmidi* ezmidi = ezmidi_create(&config);
 
 	int source_count = ezmidi_get_source_count(ezmidi);
-    
+
 	if (source_count == 0) {
 		std::cout << "No MIDI sources available" << std::endl;
 		return 1;
@@ -48,7 +48,7 @@ int main (int argc, char** argv)
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	
+
 	if (t.joinable()) t.join();
 
 	std::cout << "Shutting down ezmidi" << std::endl;
