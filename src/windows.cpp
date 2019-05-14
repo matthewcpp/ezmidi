@@ -17,8 +17,6 @@ struct Ezmidi_Windows
 	Ezmidi_Config config;
 };
 
-#define LOW_BYTE 0x000000FF
-
 static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_type, DWORD_PTR instance_data, DWORD_PTR message, DWORD timestamp)
 {
 	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(instance_data);
@@ -26,16 +24,8 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	
 	if (message_type != MIM_DATA) return;
 
-	int status = static_cast<int>(message & LOW_BYTE);
-	if (Midi::shouldFilterEvent(status)) return;
-
-	if (Midi::isNoteEvent(status)) {
-		int key = static_cast<int>((message >> 8) & LOW_BYTE);
-		int velocity = static_cast<int>((message >> 16) & LOW_BYTE);
-
-		std::lock_guard<std::mutex> lock(midi_lib->mutex);
-		midi_lib->event_queue.pushNote(status, key, velocity);
-	}
+	std::lock_guard<std::mutex> lock(midi_lib->mutex);
+	midi_lib->event_queue.processMessage(reinterpret_cast<const unsigned char *>(&message));
 }
 
 void close_existing_connection(Ezmidi_Windows* midi_lib)

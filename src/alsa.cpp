@@ -13,6 +13,7 @@
 #include <atomic>
 #include <iostream>
 #include <chrono>
+#include <cstdint>
 
 struct EzmidiAlsa
 {
@@ -88,7 +89,7 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
 {
     ezmidi_alsa->process_input = true;
 
-    unsigned char buffer[256] = {0};
+    uint8_t buffer[256] = {0};
 
     while (ezmidi_alsa->process_input) {
         int status = 0;
@@ -97,14 +98,8 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
             status = snd_rawmidi_read(ezmidi_alsa->midi_input, buffer, 256);
 
             if (status > 0) {
-                unsigned int status_byte = buffer[0];
-                if (Midi::shouldFilterEvent(status_byte)) continue;
-
-                if (Midi::isNoteEvent(status_byte)) {
-                    std::lock_guard<std::mutex>(ezmidi_alsa->mutex);
-
-                    ezmidi_alsa->event_queue.pushNote(status_byte, buffer[1], buffer[2]);
-                }
+				std::lock_guard<std::mutex>(ezmidi_alsa->mutex);
+				ezmidi_alsa->event_queue.processMessage(buffer);
             }
         }
 

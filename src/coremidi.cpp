@@ -31,18 +31,8 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 	MIDIPacket *packet = (MIDIPacket*)packetList->packet;
 
 	for (int i = 0; i < packetList->numPackets; i++) {
-		int midiStatus = packet->data[0];
-		
-		if (Midi::shouldFilterEvent(midiStatus)) {
-			continue;
-		}
-		else if (Midi::isNoteEvent(midiStatus)) {
-			int noteNumber = packet->data[1];
-			int velocity = packet->data[2];
-            
-            std::lock_guard<std::mutex>(coremidi->mutex);
-			coremidi->event_queue.pushNote(midiStatus, noteNumber, velocity);
-		}
+        std::lock_guard<std::mutex>(coremidi->mutex);
+        coremidi->event_queue.processMessage(packet->data);
 
 		packet = MIDIPacketNext(packet);
 	}
