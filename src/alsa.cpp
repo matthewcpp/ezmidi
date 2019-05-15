@@ -22,17 +22,18 @@ struct EzmidiAlsa
     Ezmidi::EventQueue event_queue;
     std::mutex mutex;
     std::thread input_thread;
-    std::atomic_bool process_input = false;
-    std::any return_data;
+    std::atomic_bool process_input;
+    std::string return_data;
 };
 
 using SourceDeviceVector = std::vector<std::pair<std::string, std::string>>;
 SourceDeviceVector get_source_device_info();
 
 
-ezmidi* ezmidi_create(Ezmidi_Config* config)
+Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
 {
     auto ezmidi_alsa = new EzmidiAlsa{};
+    ezmidi_alsa->process_input = false;
 
     if (config) {
         ezmidi_alsa->config = *config;
@@ -41,10 +42,10 @@ ezmidi* ezmidi_create(Ezmidi_Config* config)
         ezmidi_config_init(&ezmidi_alsa->config);
     }
 
-    return reinterpret_cast<ezmidi*>(ezmidi_alsa);
+    return reinterpret_cast<Ezmidi_Context*>(ezmidi_alsa);
 }
 
-void ezmidi_destroy(ezmidi* context)
+void ezmidi_destroy(Ezmidi_Context* context)
 {
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
 
@@ -61,14 +62,14 @@ void ezmidi_destroy(ezmidi* context)
     delete ezmidi_alsa;
 }
 
-int ezmidi_get_source_count([[maybe_unused]] ezmidi* context)
+int ezmidi_get_source_count(Ezmidi_Context* /* context */)
 {
     SourceDeviceVector devices = get_source_device_info();
 
     return static_cast<int>(devices.size());
 }
 
-const char* ezmidi_get_source_name(ezmidi* context, int source_index)
+const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 {
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
 
@@ -78,7 +79,7 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
         if (source_index < devices.size()) {
             ezmidi_alsa->return_data = devices[source_index].second;
 
-            return std::any_cast<std::string&>(ezmidi_alsa->return_data).c_str();
+            return ezmidi_alsa->return_data.c_str();
         }
     }
 
@@ -98,7 +99,7 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
             status = snd_rawmidi_read(ezmidi_alsa->midi_input, buffer, 256);
 
             if (status > 0) {
-				std::lock_guard<std::mutex>(ezmidi_alsa->mutex);
+				std::lock_guard<std::mutex> lock(ezmidi_alsa->mutex);
 				ezmidi_alsa->event_queue.processMessage(buffer);
             }
         }
@@ -107,7 +108,7 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
     }
 }
 
-void ezmidi_connect_source(ezmidi* context, int source)
+void ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
@@ -121,7 +122,7 @@ void ezmidi_connect_source(ezmidi* context, int source)
 
 }
 
-int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event)
+int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
 {
     if (event) {
         auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
