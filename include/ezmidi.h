@@ -18,7 +18,7 @@ extern "C" {
 typedef struct Ezmidi_Context Ezmidi_Context;
 
 typedef enum {
-	EZMIDI_NOTE,
+	EZMIDI_EVENT_NOTE,
 } Ezmidi_EventType;
 
 typedef enum {
