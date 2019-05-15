@@ -4,7 +4,6 @@
 
 #include <CoreMIDI/MIDIServices.h>
 #include <iostream>
-#include <any>
 #include <string>
 #include <sstream>
 #include <mutex>
@@ -19,7 +18,7 @@ struct ez_coremidi {
 	MIDIClientRef midi_client = NULL;
 	MIDIPortRef midi_port = NULL;
 	Ezmidi::EventQueue event_queue;
-	std::any return_data;
+    std::string return_data;
     std::mutex mutex;
     Ezmidi_Config config;
 };
@@ -126,7 +125,7 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
     else {
         coremidi->return_data = get_source_property(midi_source, kMIDIPropertyModel);
     }
-	return std::any_cast<std::string&>(coremidi->return_data).c_str();
+	return coremidi->return_data.c_str();
 }
 
 void ezmidi_connect_source(ezmidi* context, int source)
