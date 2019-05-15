@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-struct ezmidi;
+typedef struct ezmidi ezmidi;
 
 typedef enum {
 	EZMIDI_NOTE,
