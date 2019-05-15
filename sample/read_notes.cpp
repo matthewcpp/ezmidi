@@ -12,7 +12,7 @@ int main (int argc, char** argv)
 	ezmidi_config_init(&config);
 	config.log_func = log_message;
 
-	ezmidi* ezmidi = ezmidi_create(&config);
+	Ezmidi_Context* ezmidi = ezmidi_create(&config);
 
 	int source_count = ezmidi_get_source_count(ezmidi);
 
@@ -41,7 +41,7 @@ int main (int argc, char** argv)
 		Ezmidi_Event event;
 
 		while (ezmidi_pump_events(ezmidi, &event)) {
-			if (event.type == EZMIDI_NOTE) {
+			if (event.type == EZMIDI_EVENT_NOTE) {
 				std::cout << (event.note_event.detail == EZMIDI_NOTEEVENT_ON ? "Note On: " : "Note Off: ") << event.note_event.note << " velocity: " << event.note_event.velocity << std::endl;
 			}
 		}

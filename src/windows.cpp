@@ -4,22 +4,21 @@
 
 #include "windows.h"
 
-#include <any>
 #include <string>
 #include <mutex>
 
-struct Ezmidi_Windows
+struct EzmidiWindows
 {
 	HMIDIIN input_handle = NULL;
 	Ezmidi::EventQueue event_queue;
-	std::any return_data;
+	std::string return_data;
 	std::mutex mutex;
 	Ezmidi_Config config;
 };
 
 static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_type, DWORD_PTR instance_data, DWORD_PTR message, DWORD timestamp)
 {
-	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(instance_data);
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(instance_data);
 	const char* packet = reinterpret_cast<const char*>(&message);
 	
 	if (message_type != MIM_DATA) return;
@@ -28,7 +27,7 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	midi_lib->event_queue.processMessage(reinterpret_cast<const unsigned char *>(&message));
 }
 
-void close_existing_connection(Ezmidi_Windows* midi_lib)
+void close_existing_connection(EzmidiWindows* midi_lib)
 {
 	if (midi_lib->input_handle == NULL) return;
 
@@ -39,21 +38,21 @@ void close_existing_connection(Ezmidi_Windows* midi_lib)
 	midi_lib->input_handle = NULL;
 }
 
-ezmidi* ezmidi_create(Ezmidi_Config* config)
+Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
 {
-	auto midi_lib = new Ezmidi_Windows{};
+	auto midi_lib = new EzmidiWindows{};
 
 	if (config)
 		midi_lib->config = *config;
 	else
 		ezmidi_config_init(&midi_lib->config);
 
-	return reinterpret_cast<ezmidi*>(midi_lib);
+	return reinterpret_cast<Ezmidi_Context*>(midi_lib);
 }
 
-void ezmidi_destroy(ezmidi* context)
+void ezmidi_destroy(Ezmidi_Context* context)
 {
-	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(context);
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 	{
 		std::lock_guard<std::mutex> lock(midi_lib->mutex);
 		close_existing_connection(midi_lib);
@@ -62,12 +61,12 @@ void ezmidi_destroy(ezmidi* context)
 	delete midi_lib;
 }
 
-int ezmidi_get_source_count(ezmidi* context)
+int ezmidi_get_source_count(Ezmidi_Context* /* context */)
 {
 	return static_cast<int>(midiInGetNumDevs());
 }
 
-const char* ezmidi_get_source_name(ezmidi* context, int source_index)
+const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 {
 	int num_devices = static_cast<int>(midiInGetNumDevs());
 
@@ -75,19 +74,19 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 		return nullptr;
 	}
 
-	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(context);
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 
 	MIDIINCAPS source_info;
 	midiInGetDevCaps(source_index, &source_info, sizeof(MIDIINCAPS));
 	std::string name = source_info.szPname;
 	midi_lib->return_data = name;
 
-	return std::any_cast<std::string&>(midi_lib->return_data).c_str();
+	return midi_lib->return_data.c_str();
 }
 
-void ezmidi_connect_source(ezmidi* context, int source)
+void ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
-	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(context);
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 
 	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 
@@ -118,9 +117,9 @@ void ezmidi_connect_source(ezmidi* context, int source)
 	}
 }
 
-int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event)
+int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
 {
-	auto midi_lib = reinterpret_cast<Ezmidi_Windows*>(context);
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 
 	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 

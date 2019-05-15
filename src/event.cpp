@@ -20,7 +20,7 @@ void EventQueue::processNoteEvent(const uint8_t* data)
 	int status = data[0];
 
 	Ezmidi_Event event;
-	event.note_event.type = Ezmidi_EventType::EZMIDI_NOTE;
+	event.note_event.type = Ezmidi_EventType::EZMIDI_EVENT_NOTE;
 	event.note_event.note = data[1];
 	event.note_event.velocity = data[2];
 	

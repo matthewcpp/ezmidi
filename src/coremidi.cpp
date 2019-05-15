@@ -14,7 +14,7 @@
 // Discussion from RtMidi issue page: https://github.com/thestk/rtmidi/issues/155
 // Workaround is to open MIDIMonitor in the background before calling MIDIClientCreate from bundle: https://www.snoize.com/MIDIMonitor/
 
-struct ez_coremidi {
+struct EzmidiCoreMidi {
 	MIDIClientRef midi_client = NULL;
 	MIDIPortRef midi_port = NULL;
 	Ezmidi::EventQueue event_queue;
@@ -25,7 +25,7 @@ struct ez_coremidi {
 
 void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnRefCon)
 {
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(refCon);
+	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(refCon);
 	
 	MIDIPacket *packet = (MIDIPacket*)packetList->packet;
 
@@ -38,7 +38,7 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 	
 }
 
-void log_error(ez_coremidi* coremidi, const char* method, OSStatus status)
+void log_error(EzmidiCoreMidi* coremidi, const char* method, OSStatus status)
 {
     if (coremidi->config.log_func) {
         std::ostringstream s;
@@ -48,7 +48,7 @@ void log_error(ez_coremidi* coremidi, const char* method, OSStatus status)
 }
 
 // Disposing of a midi client will also clean up all it's ports.
-void close_existing_connection(ez_coremidi* coremidi)
+void close_existing_connection(EzmidiCoreMidi* coremidi)
 {
     if (coremidi->midi_client) {
         if (coremidi->config.log_func) {
@@ -63,20 +63,20 @@ void close_existing_connection(ez_coremidi* coremidi)
     }
 }
 
-ezmidi* ezmidi_create(Ezmidi_Config* config)
+Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
 {
-	auto* coremidi = new ez_coremidi();
+	auto* coremidi = new EzmidiCoreMidi();
     if (config)
         coremidi->config = *config;
     else
         ezmidi_config_init(&coremidi->config);
 	
-	return reinterpret_cast<ezmidi*>(coremidi);
+	return reinterpret_cast<Ezmidi_Context*>(coremidi);
 }
 
-void ezmidi_destroy(ezmidi* context)
+void ezmidi_destroy(Ezmidi_Context* context)
 {
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
     {
         std::lock_guard<std::mutex>(coremidi->mutex);
         close_existing_connection(coremidi);
@@ -85,7 +85,7 @@ void ezmidi_destroy(ezmidi* context)
 	delete coremidi;
 }
 
-int ezmidi_get_source_count(ezmidi* context)
+int ezmidi_get_source_count(Ezmidi_Context* context)
 {
 	return MIDIGetNumberOfSources();
 }
@@ -101,13 +101,13 @@ std::string get_source_property(MIDIEndpointRef midi_source, CFStringRef propert
 	return std::string(property_buffer);
 }
 
-const char* ezmidi_get_source_name(ezmidi* context, int source_index)
+const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 {
 	int source_count = MIDIGetNumberOfSources();
 	if (source_index < 0 || source_index >= source_count)
 		return nullptr;
 	
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
 	MIDIEndpointRef midi_source = MIDIGetSource(source_index);
     
     std::string manufacturer = get_source_property(midi_source, kMIDIPropertyManufacturer);
@@ -128,9 +128,9 @@ const char* ezmidi_get_source_name(ezmidi* context, int source_index)
 	return coremidi->return_data.c_str();
 }
 
-void ezmidi_connect_source(ezmidi* context, int source)
+void ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
     
     std::lock_guard<std::mutex>(coremidi->mutex);
     if (source < 0 || source >= MIDIGetNumberOfSources()) {
@@ -146,7 +146,7 @@ void ezmidi_connect_source(ezmidi* context, int source)
     OSStatus error = MIDIClientCreate(CFSTR("coremidi_client"), nullptr, nullptr, &coremidi->midi_client);
     if (error) {
         log_error(coremidi, "MIDIClientCreate", error);
-        ezmidi_destroy(reinterpret_cast<ezmidi*>(coremidi));
+        ezmidi_destroy(reinterpret_cast<Ezmidi_Context*>(coremidi));
         return;
     }
     
@@ -170,10 +170,10 @@ void ezmidi_connect_source(ezmidi* context, int source)
 	}
 }
 
-int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event)
+int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
 {
 	if (!event) return 0;
 	
-	auto* coremidi = reinterpret_cast<ez_coremidi*>(context);
+	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
 	return coremidi->event_queue.pumpEvents(*event);
 }

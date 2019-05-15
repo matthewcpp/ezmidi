@@ -15,10 +15,10 @@
 extern "C" {
 #endif
 
-typedef struct ezmidi ezmidi;
+typedef struct Ezmidi_Context Ezmidi_Context;
 
 typedef enum {
-	EZMIDI_NOTE,
+	EZMIDI_EVENT_NOTE,
 } Ezmidi_EventType;
 
 typedef enum {
@@ -45,15 +45,15 @@ typedef struct {
 	void* user_data;
 } Ezmidi_Config;
 
-EZMIDI_API ezmidi* ezmidi_create(Ezmidi_Config* config);
-EZMIDI_API void ezmidi_destroy(ezmidi* context);
+EZMIDI_API Ezmidi_Context* ezmidi_create(Ezmidi_Config* config);
+EZMIDI_API void ezmidi_destroy(Ezmidi_Context* context);
 EZMIDI_API void ezmidi_config_init(Ezmidi_Config* config);
 
-EZMIDI_API int ezmidi_get_source_count(ezmidi* context);
-EZMIDI_API const char* ezmidi_get_source_name(ezmidi* context, int source_index);
+EZMIDI_API int ezmidi_get_source_count(Ezmidi_Context* context);
+EZMIDI_API const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index);
 
-EZMIDI_API void ezmidi_connect_source(ezmidi* context, int source);
-EZMIDI_API int ezmidi_pump_events(ezmidi* context, Ezmidi_Event* event);
+EZMIDI_API void ezmidi_connect_source(Ezmidi_Context* context, int source);
+EZMIDI_API int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event);
 
 #ifdef __cplusplus
 }
