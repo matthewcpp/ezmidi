@@ -12,7 +12,7 @@ int main (int argc, char** argv)
 	ezmidi_config_init(&config);
 	config.log_func = log_message;
 
-	ezmidi* ezmidi = ezmidi_create(&config);
+	Ezmidi_Context* ezmidi = ezmidi_create(&config);
 
 	int source_count = ezmidi_get_source_count(ezmidi);
 

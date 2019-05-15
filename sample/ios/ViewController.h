@@ -6,7 +6,7 @@
 @interface ViewController : UIViewController{
     NSInteger selectedMidiDevice;
     NSTimer* updateTimer;
-    ezmidi* ezmidi_context;
+    Ezmidi_Context* ezmidi_context;
 }
 
 @property (weak, nonatomic) IBOutlet UITextField *midiDeviceText;

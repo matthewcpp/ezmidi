@@ -26,7 +26,7 @@ else()
 	add_library(ezmidi SHARED ${ezmidi_source})
 endif()
 
-set_property(TARGET ezmidi PROPERTY CXX_STANDARD 17)
+set_property(TARGET ezmidi PROPERTY CXX_STANDARD 11)
 target_include_directories(ezmidi PUBLIC include)
 
 if (APPLE)
