@@ -17,6 +17,18 @@ extern "C" {
 
 typedef struct Ezmidi_Context Ezmidi_Context;
 
+/** Enumerates error messages returned by the library. */
+typedef enum {
+	/** No error.  The operation was successful. */
+	EZMIDI_ERROR_NONE = 0,
+
+	/** The supplied source index is invalid.  */
+	EZMIDI_ERROR_INVALID_SOURCE,
+
+	/** The source was unable to be opened.  The device may be busy, or has possibly been disconnected. */
+	EZMIDI_ERROR_CONNECTION_FAILED
+} Ezmidi_Error;
+
 /** Enumerates the type of all MIDI events. */
 typedef enum {
 	EZMIDI_EVENT_NOTE,
@@ -113,7 +125,7 @@ Connects to the midi input source with a given index.
 \param context Ezmidi context pointer.
 \param source index of the source to connect to.
 */
-EZMIDI_API void ezmidi_connect_source(Ezmidi_Context* context, int source);
+EZMIDI_API Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source);
 
 /**
 Pumps the event queue for the next pending event.  Events are processed in a FIFO manner.

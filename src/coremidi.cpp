@@ -128,13 +128,13 @@ const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 	return coremidi->return_data.c_str();
 }
 
-void ezmidi_connect_source(Ezmidi_Context* context, int source)
+Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
     
     std::lock_guard<std::mutex>(coremidi->mutex);
     if (source < 0 || source >= MIDIGetNumberOfSources()) {
-        return;
+        return EZMIDI_ERROR_INVALID_SOURCE;
     }
     
     close_existing_connection(coremidi);
@@ -146,28 +146,39 @@ void ezmidi_connect_source(Ezmidi_Context* context, int source)
     OSStatus error = MIDIClientCreate(CFSTR("coremidi_client"), nullptr, nullptr, &coremidi->midi_client);
     if (error) {
         log_error(coremidi, "MIDIClientCreate", error);
-        ezmidi_destroy(reinterpret_cast<Ezmidi_Context*>(coremidi));
-        return;
+        MIDIClientDispose(coremidi->midi_client);
+		coremidi->midi_client = NULL;
+        return EZMIDI_ERROR_CONNECTION_FAILED;
     }
     
     error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("coremidi_port"), midiReadProc, coremidi, &coremidi->midi_port);
     if (error) {
         log_error(coremidi, "MIDIInputPortCreate", error);
         MIDIClientDispose(coremidi->midi_client);
-        delete coremidi;
+		coremidi->midi_client = NULL;
         
-        return;
+        return EZMIDI_ERROR_CONNECTION_FAILED;
     }
 	
 	MIDIEndpointRef midi_source = MIDIGetSource(source);
 	
 	if (midi_source != 0) {
 		OSStatus error = MIDIPortConnectSource(coremidi->midi_port, midi_source, nullptr); // todo: handle for identifying connections?
-        if (error) log_error(coremidi, "MIDIPortConnectSource", error);
+        if (error) {
+			log_error(coremidi, "MIDIPortConnectSource", error);
+			MIDIClientDispose(coremidi->midi_client);
+			coremidi->midi_client = NULL;
+			return EZMIDI_ERROR_CONNECTION_FAILED;
+		}
 	}
 	else {
 		log_error(coremidi, "MIDIGetSource", 0);
+		MIDIClientDispose(coremidi->midi_client);
+		coremidi->midi_client = NULL;
+		return EZMIDI_ERROR_CONNECTION_FAILED;
 	}
+	
+	return EZMIDI_ERROR_NONE;
 }
 
 int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)

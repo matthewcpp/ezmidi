@@ -108,17 +108,27 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
     }
 }
 
-void ezmidi_connect_source(Ezmidi_Context* context, int source)
+Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
 
     int open_mode = SND_RAWMIDI_NONBLOCK;
     SourceDeviceVector devices = get_source_device_info();
-    snd_rawmidi_open(&ezmidi_alsa->midi_input, NULL, devices[source].first.c_str(), open_mode);
+	if (source < 0 || source >= devices.size()) {
+		return EZMIDI_ERROR_INVALID_SOURCE;
+	}
+	
+    int status = snd_rawmidi_open(&ezmidi_alsa->midi_input, NULL, devices[source].first.c_str(), open_mode);
+	
+	if (status < 0) {
+		return EZMIDI_ERROR_CONNECTION_FAILED;
+	}
 
 
     ezmidi_alsa->input_thread = std::thread(alsa_input_thread, ezmidi_alsa);
+	
+	return EZMIDI_ERROR_NONE;
 
 }
 
