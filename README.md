@@ -14,3 +14,28 @@ Building for desktop platforms is very simple as there are no external dependenc
 
 ### Building on iOS
 The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  Users wishing to build for iOS should ensure they are using CMake version > 3.14.  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify "iOS" for the `CMAKE_SYSTEM_NAME`.  Aside from the paramters supported by the CMake iOS toolchain, the library does not require any additional switches.
+
+## Getting Started
+Refer to the sample for your particular platform, but in general usage consists of creating a context, connecting to a source, and then pumping events.  For example:
+
+```c++
+Ezmidi_Context* ezmidi = ezmidi_create(nullptr);
+
+if (ezmidi_get_source_count(ezmidi) == 0) {
+	std::cout << "No MIDI sources found." << std::endl;
+	return 1;
+}
+
+std::cout << "Connecting to source: " ezmidi_get_source_name(ezmidi, 0) << std::endl;
+ezmidi_connect_source(ezmidi, 0);
+
+while (monitor_midi_events) {
+	Ezmidi_Event event;
+
+	while (ezmidi_pump_events(ezmidi, &event)) {
+		std::cout << "MIDI Event: " << event.type << std::endl;
+	}
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+```
