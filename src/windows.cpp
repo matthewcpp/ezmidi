@@ -84,7 +84,7 @@ const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 	return midi_lib->return_data.c_str();
 }
 
-void ezmidi_connect_source(Ezmidi_Context* context, int source)
+Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 
@@ -92,7 +92,7 @@ void ezmidi_connect_source(Ezmidi_Context* context, int source)
 
 	int source_count = static_cast<int>(midiInGetNumDevs());
 	if (source < 0 || source >= source_count) {
-		return;
+		return EZMIDI_ERROR_INVALID_SOURCE;
 	}
 
 	close_existing_connection(midi_lib);
@@ -106,6 +106,8 @@ void ezmidi_connect_source(Ezmidi_Context* context, int source)
 
 	if (result == MMSYSERR_NOERROR) {
 		midiInStart(midi_lib->input_handle);
+
+		return EZMIDI_ERROR_NONE;
 	}
 	else {
 		if (midi_lib->config.log_func) {
@@ -114,6 +116,8 @@ void ezmidi_connect_source(Ezmidi_Context* context, int source)
 		}
 
 		midiInClose(midi_lib->input_handle);
+
+		return EZMIDI_ERROR_CONNECTION_FAILED;
 	}
 }
 
