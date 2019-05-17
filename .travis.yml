@@ -1,0 +1,23 @@
+language: cpp
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make
+
+addons:
+  apt:
+    packages:
+      - libasound2-dev
+
+matrix:
+  include:
+    - os: linux
+      compiler: g++
+    - os: linux
+      compiler: clang
+    - os: osx
+      compiler: clang
