@@ -1,4 +1,6 @@
 # ezmidi
+[![Build Status](https://travis-ci.org/matthewcpp/ezmidi.svg?branch=master)](https://travis-ci.org/matthewcpp/ezmidi)
+
 Ezmidi is a library for reading messages from a midi controller.  The goal of this project is to create a clean, simple and platform independant API that can easily be used standalone or as a plugin.
 
 ### Supported Platforms
