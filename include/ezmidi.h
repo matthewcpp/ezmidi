@@ -26,7 +26,10 @@ typedef enum {
 	EZMIDI_ERROR_INVALID_SOURCE,
 
 	/** The source was unable to be opened.  The device may be busy, or has possibly been disconnected. */
-	EZMIDI_ERROR_CONNECTION_FAILED
+	EZMIDI_ERROR_CONNECTION_FAILED,
+
+	/** The operation faild because there was no active connection. */
+	EZMIDI_ERROR_NO_SOURCE_CONNECTED
 } Ezmidi_Error;
 
 /** Enumerates the type of all MIDI events. */
@@ -126,6 +129,20 @@ Connects to the midi input source with a given index.
 \param source index of the source to connect to.
 */
 EZMIDI_API Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source);
+
+/**
+Closes the active connection for the supplied context.
+\param context Ezmidi context pointer.
+\returns Error code indicating the result of the operation.
+*/
+EZMIDI_API Ezmidi_Error ezmidi_disconnect_source(Ezmidi_Context* context);
+
+/**
+Gets whether a context has a connected source.
+\param context Ezmidi context pointer.
+\returns non zero value if a source is connected.  If no source is connected 0 is returned.
+*/
+EZMIDI_API int ezmidi_has_source_connected(Ezmidi_Context* context);
 
 /**
 Pumps the event queue for the next pending event.  Events are processed in a FIFO manner.

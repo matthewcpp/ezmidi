@@ -27,15 +27,19 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	midi_lib->event_queue.processMessage(reinterpret_cast<const unsigned char *>(&message));
 }
 
-void close_existing_connection(EzmidiWindows* midi_lib)
+Ezmidi_Error close_existing_connection(EzmidiWindows* midi_lib)
 {
-	if (midi_lib->input_handle == NULL) return;
+	if (midi_lib->input_handle == NULL) {
+		return EZMIDI_ERROR_NO_SOURCE_CONNECTED;
+	}
 
 	midiInReset(midi_lib->input_handle);
 	midiInStop(midi_lib->input_handle);
 	midiInClose(midi_lib->input_handle);
 
 	midi_lib->input_handle = NULL;
+
+	return EZMIDI_ERROR_NONE;
 }
 
 Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
@@ -119,6 +123,20 @@ Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 
 		return EZMIDI_ERROR_CONNECTION_FAILED;
 	}
+}
+
+Ezmidi_Error ezmidi_disconnect_source(Ezmidi_Context* context)
+{
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
+	std::lock_guard<std::mutex> lock(midi_lib->mutex);
+
+	return close_existing_connection(midi_lib);
+}
+
+int ezmidi_has_source_connected(Ezmidi_Context* context)
+{
+	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
+	return midi_lib->input_handle != NULL;
 }
 
 int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)

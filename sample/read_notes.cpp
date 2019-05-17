@@ -17,6 +17,7 @@ int main (int argc, char** argv)
 	int source_count = ezmidi_get_source_count(ezmidi);
 
 	if (source_count == 0) {
+		ezmidi_destroy(ezmidi);
 		std::cout << "No MIDI sources available" << std::endl;
 		return 1;
 	}
@@ -24,10 +25,16 @@ int main (int argc, char** argv)
 	std::cout << "MIDI Sources available: " << source_count << std::endl;
 
 	for (int i = 0; i < source_count; i++) {
-		std::cout << ezmidi_get_source_name(ezmidi, i) << std::endl;
+		std::cout << i << ":\t" <<  ezmidi_get_source_name(ezmidi, i) << std::endl;
 	}
 
-	ezmidi_connect_source(ezmidi, 0);
+	Ezmidi_Error error = ezmidi_connect_source(ezmidi, 0);
+	if (error) {
+		std::cout << "Error connecting to source: " << 0 << std::endl;
+		ezmidi_destroy(ezmidi);
+
+		return 1;
+	}
 
 	std::cout << "Monitoring midi events.  Press Enter to stop." << std::endl;
 	bool monitor_midi_events = true;

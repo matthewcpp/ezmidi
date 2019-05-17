@@ -45,19 +45,29 @@ Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
     return reinterpret_cast<Ezmidi_Context*>(ezmidi_alsa);
 }
 
+Ezmidi_Error close_active_connection(EzmidiAlsa* ezmidi_alsa)
+{
+	if (ezmidi_alsa->midi_input) {
+		ezmidi_alsa->process_input = false;
+
+		if (ezmidi_alsa->input_thread.joinable()) {
+			ezmidi_alsa->input_thread.join();
+		}
+
+		snd_rawmidi_close(ezmidi_alsa->midi_input);
+		ezmidi_alsa->midi_input = nullptr;
+
+		return EZMIDI_ERROR_NONE;
+	}
+
+	return EZMIDI_ERROR_NO_SOURCE_CONNECTED;
+}
+
 void ezmidi_destroy(Ezmidi_Context* context)
 {
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
 
-    if (ezmidi_alsa->midi_input) {
-        ezmidi_alsa->process_input = false;
-
-        if (ezmidi_alsa->input_thread.joinable()) {
-            ezmidi_alsa->input_thread.join();
-        }
-
-        snd_rawmidi_close(ezmidi_alsa->midi_input);
-    }
+	close_active_connection(ezmidi_alsa);
 
     delete ezmidi_alsa;
 }
@@ -110,7 +120,6 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
 
 Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
-
     auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
 
     int open_mode = SND_RAWMIDI_NONBLOCK;
@@ -125,11 +134,23 @@ Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 		return EZMIDI_ERROR_CONNECTION_FAILED;
 	}
 
-
     ezmidi_alsa->input_thread = std::thread(alsa_input_thread, ezmidi_alsa);
 	
 	return EZMIDI_ERROR_NONE;
+}
 
+Ezmidi_Error ezmidi_disconnect_source(Ezmidi_Context* context)
+{
+	auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
+	
+	return close_active_connection(ezmidi_alsa);
+}
+
+int ezmidi_has_source_connected(Ezmidi_Context* context)
+{
+	auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
+
+	return ezmidi_alsa->midi_input != nullptr;
 }
 
 int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
