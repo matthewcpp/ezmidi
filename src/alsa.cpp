@@ -5,7 +5,6 @@
 
 #include <alsa/asoundlib.h>
 
-#include <any>
 #include <mutex>
 #include <vector>
 #include <string>
