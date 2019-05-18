@@ -2,7 +2,7 @@ version: '{build}'
 
 image: Visual Studio 2017
   
-clone_folder: 'c:\development\ezmidi'
+clone_folder: 'c:\ezmidi'
 
 environment:
   matrix:
@@ -10,16 +10,16 @@ environment:
     - cmake_generator: '"Visual Studio 15 2017" -A x64'
     
 before_build:
-  - 'mkdir c:\development\ezmidi\build'
-  - 'cd c:\development\ezmidi\build'
-  - 'cmake .. -G %cmake_generator%'
+  - 'mkdir -p c:\build\ezmidi'
+  - 'cd c:\build\ezmidi'
+  - 'cmake c:\ezmidi -G %cmake_generator%'
     
 configuration:
   - Release
   
 build:
-  project: 'c:\development\ezmidi\build\ezmidi.sln'
+  project: 'c:\build\ezmidi\ezmidi.sln'
   
-#test_script: 
-#  - 'cd C:\development\ezmidi\build'
-#  - 'ctest -C Release'
+test_script: 
+  - 'cd C:\build\ezmidi'
+  - 'ctest -C Release'

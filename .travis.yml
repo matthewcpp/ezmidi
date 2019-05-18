@@ -6,7 +6,7 @@ before_script:
   - cmake ..
 
 script:
-  - make
+  - make && make test
 
 addons:
   apt:
@@ -16,8 +16,11 @@ addons:
 matrix:
   include:
     - os: linux
+      dist: xenial
       compiler: g++
     - os: linux
+      dist: xenial
       compiler: clang
     - os: osx
+      osx_image: xcode10.2
       compiler: clang
