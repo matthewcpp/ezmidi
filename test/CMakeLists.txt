@@ -14,7 +14,8 @@ set(gtest_sources
     ${googletest_SOURCE_DIR}/googletest/src/gtest-all.cc)
 
 set(test_sources
-    test_notes.cpp)
+    test_notes.cpp
+    test_queue.cpp)
     
 set(ezmidi_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/event.cpp)
@@ -31,3 +32,4 @@ source_group(ezmidi FILES ${ezmidi_sources})
 source_group(tests FILES ${test_sources})
 
 add_test(NAME test_notes COMMAND ezmidi_test "--gtest_filter=Notes*")
+add_test(NAME test_queue COMMAND ezmidi_test "--gtest_filter=Queue*")
