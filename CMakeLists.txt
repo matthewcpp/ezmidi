@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.11)
 
 project(ezmidi)
+
+include(FetchContent)
+find_package(Threads REQUIRED)
 
 set(ezmidi_source
 	include/ezmidi.h
@@ -35,7 +38,6 @@ elseif(WIN32)
 	target_link_libraries(ezmidi PUBLIC Winmm.lib)
     target_compile_definitions(ezmidi PRIVATE BUILD_EZMIDI_DLL)
 else()
-	find_package(Threads REQUIRED)
 	target_link_libraries(ezmidi PUBLIC "-lasound" Threads::Threads)
 endif()
 
@@ -46,4 +48,8 @@ else()
 	target_include_directories(read_notes PRIVATE include)
 	target_link_libraries(read_notes PRIVATE ezmidi)
 	set_property(TARGET read_notes PROPERTY CXX_STANDARD 11)
+    
+    enable_testing()
+    
+    add_subdirectory(test)
 endif()
