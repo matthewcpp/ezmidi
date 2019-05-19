@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <mutex>
 
 // MRL 05/09/2019
 // Note that there appears to be a bug when calling MIDIClientCreate from within a bundle
@@ -17,7 +16,6 @@ struct EzmidiCoreMidi {
 	MIDIClientRef midi_client = NULL;
 	ezmidi::MessageProcessor message_processor;
     std::string return_data;
-    std::mutex mutex;
     Ezmidi_Config config;
 };
 
@@ -28,7 +26,6 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 	MIDIPacket *packet = (MIDIPacket*)packetList->packet;
 
 	for (int i = 0; i < packetList->numPackets; i++) {
-        std::lock_guard<std::mutex>(coremidi->mutex);
         coremidi->message_processor.processMidiMessage(packet->data);
 
 		packet = MIDIPacketNext(packet);
@@ -96,10 +93,7 @@ int ezmidi_has_source_connected(Ezmidi_Context* context)
 void ezmidi_destroy(Ezmidi_Context* context)
 {
 	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
-    {
-        std::lock_guard<std::mutex>(coremidi->mutex);
-        close_existing_connection(coremidi);
-    }
+    close_existing_connection(coremidi);
 	
 	delete coremidi;
 }
@@ -150,8 +144,7 @@ const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
-    
-    std::lock_guard<std::mutex>(coremidi->mutex);
+
     if (source < 0 || source >= MIDIGetNumberOfSources()) {
         return EZMIDI_ERROR_INVALID_SOURCE;
     }

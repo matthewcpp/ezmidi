@@ -50,3 +50,6 @@ while (true) {
 
 ezmidi_destroy(ezmidi)
 ```
+
+### Thread Safety
+The ezmidi API is not thread safe.  All public API methods with a given context should be invoked from the same thread that called `ezmidi_create`.

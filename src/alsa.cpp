@@ -3,7 +3,6 @@
 
 #include <alsa/asoundlib.h>
 
-#include <mutex>
 #include <vector>
 #include <string>
 #include <thread>
@@ -17,7 +16,6 @@ struct EzmidiAlsa
     snd_rawmidi_t* midi_input = nullptr;
     Ezmidi_Config config;
     ezmidi::MessageProcessor message_processor;
-    std::mutex mutex;
     std::thread input_thread;
     std::atomic_bool process_input;
     std::string return_data;
@@ -106,7 +104,6 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
             status = snd_rawmidi_read(ezmidi_alsa->midi_input, buffer, 256);
 
             if (status > 0) {
-				std::lock_guard<std::mutex> lock(ezmidi_alsa->mutex);
 				ezmidi_alsa->message_processor.processMidiMessage(buffer);
             }
         }
@@ -154,7 +151,6 @@ int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event)
 {
     if (event) {
         auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
-        std::lock_guard<std::mutex> lock(ezmidi_alsa->mutex);
 
         return ezmidi_alsa->message_processor.getNextEvent(*event);
     }

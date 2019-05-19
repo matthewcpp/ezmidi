@@ -5,6 +5,8 @@ namespace ezmidi {
     
 void MessageProcessor::processMidiMessage(const uint8_t* data)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     int midiStatus = data[0];
         
     if (Midi::shouldFilterEvent(midiStatus)) {
@@ -36,7 +38,9 @@ void MessageProcessor::processNoteEvent(const uint8_t* data)
 }
 
 int MessageProcessor::getNextEvent(Ezmidi_Event& event)
-{	
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
 	if (events_.empty()) {
 		return 0;
 	}
