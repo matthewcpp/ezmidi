@@ -9,8 +9,9 @@
 namespace ezmidi {
 
 /**
-This class processes and filters midi events.
+Processes and filters raw MIDI messages.
 Relevant messages are queued as Ezmidi_Event event objects.
+This class is designed to be thread safe.
 */
 class MessageProcessor{
 public:
@@ -22,6 +23,7 @@ private:
 	
 private:
 	std::queue<Ezmidi_Event> events_;
+	std::mutex mutex_;
 };
 	
 }

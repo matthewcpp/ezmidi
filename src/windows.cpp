@@ -4,14 +4,12 @@
 #include <windows.h>
 
 #include <string>
-#include <mutex>
 
 struct EzmidiWindows
 {
 	HMIDIIN input_handle = NULL;
 	ezmidi::MessageProcessor message_processor;
 	std::string return_data;
-	std::mutex mutex;
 	Ezmidi_Config config;
 };
 
@@ -22,7 +20,6 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	
 	if (message_type != MIM_DATA) return;
 
-	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 	midi_lib->message_processor.processMidiMessage(reinterpret_cast<const unsigned char *>(&message));
 }
 
@@ -56,11 +53,8 @@ Ezmidi_Context* ezmidi_create(Ezmidi_Config* config)
 void ezmidi_destroy(Ezmidi_Context* context)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
-	{
-		std::lock_guard<std::mutex> lock(midi_lib->mutex);
-		close_existing_connection(midi_lib);
-	}
-	
+    close_existing_connection(midi_lib);
+
 	delete midi_lib;
 }
 
@@ -90,8 +84,6 @@ const char* ezmidi_get_source_name(Ezmidi_Context* context, int source_index)
 Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
-
-	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 
 	int source_count = static_cast<int>(midiInGetNumDevs());
 	if (source < 0 || source >= source_count) {
@@ -127,7 +119,6 @@ Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 Ezmidi_Error ezmidi_disconnect_source(Ezmidi_Context* context)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
-	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 
 	return close_existing_connection(midi_lib);
 }
@@ -141,8 +132,6 @@ int ezmidi_has_source_connected(Ezmidi_Context* context)
 int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
-
-	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 
 	if (event)
 		return midi_lib->message_processor.getNextEvent(*event);
