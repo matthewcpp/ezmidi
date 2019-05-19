@@ -1,8 +1,7 @@
-#include "ezmidi.h"
-#include "event.h"
-#include "midi.h"
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/event.h"
 
-#include "windows.h"
+#include <windows.h>
 
 #include <string>
 #include <mutex>

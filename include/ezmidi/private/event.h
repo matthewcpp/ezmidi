@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ezmidi.h"
+#include "ezmidi/ezmidi.h"
 
 #include <queue>
 #include <mutex>

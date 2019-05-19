@@ -1,6 +1,5 @@
-#include "ezmidi.h"
-#include "event.h"
-#include "midi.h"
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/event.h"
 
 #include <CoreMIDI/MIDIServices.h>
 #include <iostream>

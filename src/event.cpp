@@ -1,5 +1,5 @@
-#include "event.h"
-#include "midi.h"
+#include "ezmidi/private/event.h"
+#include "ezmidi/private/midi.h"
 
 namespace Ezmidi {
     

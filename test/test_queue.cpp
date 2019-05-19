@@ -1,7 +1,8 @@
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/event.h"
+#include "ezmidi/private/midi.h"
+
 #include "gtest/gtest.h"
-#include "event.h"
-#include "ezmidi.h"
-#include "midi.h"
 
 #include <array>
 

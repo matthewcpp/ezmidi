@@ -1,4 +1,4 @@
-#include "ezmidi.h"
+#include "ezmidi/ezmidi.h"
 
 #include <iostream>
 #include <thread>
