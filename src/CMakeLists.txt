@@ -3,9 +3,9 @@ set(include_directory ${CMAKE_CURRENT_SOURCE_DIR}/../include/ezmidi)
 set(ezmidi_source
 	${include_directory}/ezmidi.h
     ${include_directory}/private/midi.h
-    ${include_directory}/private/event.h 
+    ${include_directory}/private/message_processor.h 
 	
-	event.cpp 
+	message_processor.cpp 
 	common.cpp
 )
 

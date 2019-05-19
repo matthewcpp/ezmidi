@@ -1,5 +1,5 @@
 #include "ezmidi/ezmidi.h"
-#include "ezmidi/private/event.h"
+#include "ezmidi/private/message_processor.h"
 
 #include <CoreMIDI/MIDIServices.h>
 #include <iostream>
@@ -15,7 +15,7 @@
 
 struct EzmidiCoreMidi {
 	MIDIClientRef midi_client = NULL;
-	Ezmidi::EventQueue event_queue;
+	ezmidi::MessageProcessor message_processor;
     std::string return_data;
     std::mutex mutex;
     Ezmidi_Config config;
@@ -29,7 +29,7 @@ void midiReadProc(const MIDIPacketList* packetList, void* refCon, void* srcConnR
 
 	for (int i = 0; i < packetList->numPackets; i++) {
         std::lock_guard<std::mutex>(coremidi->mutex);
-        coremidi->event_queue.processMessage(packet->data);
+        coremidi->message_processor.processMidiMessage(packet->data);
 
 		packet = MIDIPacketNext(packet);
 	}
@@ -188,10 +188,10 @@ Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
 	return EZMIDI_ERROR_NONE;
 }
 
-int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
+int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event)
 {
 	if (!event) return 0;
 	auto* coremidi = reinterpret_cast<EzmidiCoreMidi*>(context);
 
-	return coremidi->event_queue.pumpEvents(*event);
+	return coremidi->message_processor.getNextEvent(*event);
 }

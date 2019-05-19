@@ -150,7 +150,7 @@ Pumps the event queue for the next pending event.  Events are processed in a FIF
 \param event Pointer to an event object that will receive event data for next pending event.
 \returns Non zero value if an event was processed, otherwise zero.
 */
-EZMIDI_API int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event);
+EZMIDI_API int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event);
 
 #ifdef __cplusplus
 }

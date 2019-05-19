@@ -1,9 +1,9 @@
-#include "ezmidi/private/event.h"
+#include "ezmidi/private/message_processor.h"
 #include "ezmidi/private/midi.h"
 
-namespace Ezmidi {
+namespace ezmidi {
     
-void EventQueue::processMessage(const uint8_t* data)
+void MessageProcessor::processMidiMessage(const uint8_t* data)
 {
     int midiStatus = data[0];
         
@@ -15,7 +15,7 @@ void EventQueue::processMessage(const uint8_t* data)
     }
 }
 	
-void EventQueue::processNoteEvent(const uint8_t* data)
+void MessageProcessor::processNoteEvent(const uint8_t* data)
 {
 	int status = data[0];
 
@@ -32,19 +32,18 @@ void EventQueue::processNoteEvent(const uint8_t* data)
 		event.note_event.detail = EZMIDI_NOTEEVENT_OFF;
 	}
 	
-	event_queue.push(event);
+	events_.push(event);
 }
 
-int EventQueue::pumpEvents(Ezmidi_Event& event)
+int MessageProcessor::getNextEvent(Ezmidi_Event& event)
 {	
-	if (!event_queue.empty()) {
-		event = event_queue.front();
-		event_queue.pop();
-		return 1;
-	}
-	else {
+	if (events_.empty()) {
 		return 0;
 	}
+
+	event = events_.front();
+	events_.pop();
+	return 1;
 }
 	
 }
