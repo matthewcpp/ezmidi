@@ -1,4 +1,4 @@
-#include "ezmidi.h"
+#include "ezmidi/ezmidi.h"
 
 void ezmidi_config_init(Ezmidi_Config* config)
 {

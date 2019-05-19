@@ -18,7 +18,7 @@ set(test_sources
     test_queue.cpp)
     
 set(ezmidi_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/../src/event.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/message_processor.cpp)
 
 add_executable(ezmidi_test ${gtest_sources} ${test_sources} ${ezmidi_sources})
 

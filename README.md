@@ -12,16 +12,22 @@ Ezmidi is a library for reading messages from a midi controller.  The goal of th
 
 ## Building 
 
+### Dependencies
+CMake 3.14 is reccomended to build ezmidi.  If you are not interested in building iOS you can use CMake 3.11.
+The [Google Test](https://github.com/google/googletest) library is also required, and will be fetched automatically by CMake during project generation.
+
 ### Building on Windows, Linux, and OSX
-Building for desktop platforms is very simple as there are no external dependencies.  Simply run cmake from the root directory of the repository.
+The library should build out of the box without any specific CMake configuration.
 
 ### Building on iOS
-The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  Users wishing to build for iOS should ensure they are using CMake version > 3.14.  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify "iOS" for the `CMAKE_SYSTEM_NAME`.  Aside from the paramters supported by the CMake iOS toolchain, the library does not require any additional switches.
+The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify `-DCMAKE_SYSTEM_NAME=iOS`.  Aside from the paramters supported by the CMake iOS toolchain, the library does not require any additional switches.
 
 ## Getting Started
 Refer to the sample for your particular platform, but in general usage consists of creating a context, connecting to a source, and then pumping events.  For example:
 
 ```c++
+#include <ezmidi/ezmidi.h>
+
 Ezmidi_Context* ezmidi = ezmidi_create(nullptr);
 
 if (ezmidi_get_source_count(ezmidi) == 0) {
@@ -32,13 +38,15 @@ if (ezmidi_get_source_count(ezmidi) == 0) {
 std::cout << "Connecting to source: " ezmidi_get_source_name(ezmidi, 0) << std::endl;
 ezmidi_connect_source(ezmidi, 0);
 
-while (monitor_midi_events) {
+while (true) {
 	Ezmidi_Event event;
 
-	while (ezmidi_pump_events(ezmidi, &event)) {
+	while (ezmidi_get_next_event(ezmidi, &event)) {
 		std::cout << "MIDI Event: " << event.type << std::endl;
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
+
+ezmidi_destroy(ezmidi)
 ```

@@ -1,4 +1,4 @@
-#include "ezmidi.h"
+#include "ezmidi/ezmidi.h"
 
 #include <iostream>
 #include <thread>
@@ -47,7 +47,7 @@ int main (int argc, char** argv)
 	while (monitor_midi_events) {
 		Ezmidi_Event event;
 
-		while (ezmidi_pump_events(ezmidi, &event)) {
+		while (ezmidi_get_next_event(ezmidi, &event)) {
 			if (event.type == EZMIDI_EVENT_NOTE) {
 				std::cout << (event.note_event.detail == EZMIDI_NOTEEVENT_ON ? "Note On: " : "Note Off: ") << event.note_event.note << " velocity: " << event.note_event.velocity << std::endl;
 			}

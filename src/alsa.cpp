@@ -1,7 +1,5 @@
-#include "ezmidi.h"
-
-#include "event.h"
-#include "midi.h"
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/message_processor.h"
 
 #include <alsa/asoundlib.h>
 
@@ -18,7 +16,7 @@ struct EzmidiAlsa
 {
     snd_rawmidi_t* midi_input = nullptr;
     Ezmidi_Config config;
-    Ezmidi::EventQueue event_queue;
+    ezmidi::MessageProcessor message_processor;
     std::mutex mutex;
     std::thread input_thread;
     std::atomic_bool process_input;
@@ -109,7 +107,7 @@ void alsa_input_thread(EzmidiAlsa *ezmidi_alsa)
 
             if (status > 0) {
 				std::lock_guard<std::mutex> lock(ezmidi_alsa->mutex);
-				ezmidi_alsa->event_queue.processMessage(buffer);
+				ezmidi_alsa->message_processor.processMidiMessage(buffer);
             }
         }
 
@@ -152,13 +150,13 @@ int ezmidi_has_source_connected(Ezmidi_Context* context)
 	return ezmidi_alsa->midi_input != nullptr;
 }
 
-int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
+int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event)
 {
     if (event) {
         auto ezmidi_alsa = reinterpret_cast<EzmidiAlsa*>(context);
         std::lock_guard<std::mutex> lock(ezmidi_alsa->mutex);
 
-        return ezmidi_alsa->event_queue.pumpEvents(*event);
+        return ezmidi_alsa->message_processor.getNextEvent(*event);
     }
 
     return 0;

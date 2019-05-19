@@ -1,7 +1,8 @@
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/message_processor.h"
+#include "ezmidi/private/midi.h"
+
 #include "gtest/gtest.h"
-#include "event.h"
-#include "ezmidi.h"
-#include "midi.h"
 
 #include <array>
 
@@ -9,38 +10,38 @@ using MidiNoteMessage = std::array<uint8_t, 3>;
 
 TEST(Queue, PumpEmpty)
 {
-	Ezmidi::EventQueue event_queue;
+	ezmidi::MessageProcessor message_processor;
 
 	Ezmidi_Event event;
-	ASSERT_EQ(event_queue.pumpEvents(event), 0);
+	ASSERT_EQ(message_processor.getNextEvent(event), 0);
 }
 
 TEST(Queue, Pump)
 {
 	MidiNoteMessage message = { Midi::Status::NoteOnChannel1, 60, 11 };
 
-	Ezmidi::EventQueue event_queue;
-	event_queue.processMessage(message.data());
+	ezmidi::MessageProcessor message_processor;
+	message_processor.processMidiMessage(message.data());
 
 	Ezmidi_Event event;
-	ASSERT_NE(event_queue.pumpEvents(event), 0);
-	ASSERT_EQ(event_queue.pumpEvents(event), 0);
+	ASSERT_NE(message_processor.getNextEvent(event), 0);
+	ASSERT_EQ(message_processor.getNextEvent(event), 0);
 }
 
 TEST(Queue, FIFO)
 {
-	Ezmidi::EventQueue event_queue;
+	ezmidi::MessageProcessor message_processor;
 
 	MidiNoteMessage message1 = { Midi::Status::NoteOnChannel1, 60, 11 };
 	MidiNoteMessage message2 = { Midi::Status::NoteOnChannel1, 61, 11 };
 
-	event_queue.processMessage(message1.data());
-	event_queue.processMessage(message2.data());
+	message_processor.processMidiMessage(message1.data());
+	message_processor.processMidiMessage(message2.data());
 
 	Ezmidi_Event event;
-	ASSERT_NE(event_queue.pumpEvents(event), 0);
+	ASSERT_NE(message_processor.getNextEvent(event), 0);
 	ASSERT_EQ(event.note_event.note, message1[1]);
 
-	ASSERT_NE(event_queue.pumpEvents(event), 0);
+	ASSERT_NE(message_processor.getNextEvent(event), 0);
 	ASSERT_EQ(event.note_event.note, message2[1]);
 }

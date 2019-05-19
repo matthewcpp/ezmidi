@@ -1,8 +1,7 @@
-#include "ezmidi.h"
-#include "event.h"
-#include "midi.h"
+#include "ezmidi/ezmidi.h"
+#include "ezmidi/private/message_processor.h"
 
-#include "windows.h"
+#include <windows.h>
 
 #include <string>
 #include <mutex>
@@ -10,7 +9,7 @@
 struct EzmidiWindows
 {
 	HMIDIIN input_handle = NULL;
-	Ezmidi::EventQueue event_queue;
+	ezmidi::MessageProcessor message_processor;
 	std::string return_data;
 	std::mutex mutex;
 	Ezmidi_Config config;
@@ -24,7 +23,7 @@ static void CALLBACK windows_midi_in_proc(HMIDIIN input_handle, UINT message_typ
 	if (message_type != MIM_DATA) return;
 
 	std::lock_guard<std::mutex> lock(midi_lib->mutex);
-	midi_lib->event_queue.processMessage(reinterpret_cast<const unsigned char *>(&message));
+	midi_lib->message_processor.processMidiMessage(reinterpret_cast<const unsigned char *>(&message));
 }
 
 Ezmidi_Error close_existing_connection(EzmidiWindows* midi_lib)
@@ -139,14 +138,14 @@ int ezmidi_has_source_connected(Ezmidi_Context* context)
 	return midi_lib->input_handle != NULL;
 }
 
-int ezmidi_pump_events(Ezmidi_Context* context, Ezmidi_Event* event)
+int ezmidi_get_next_event(Ezmidi_Context* context, Ezmidi_Event* event)
 {
 	auto midi_lib = reinterpret_cast<EzmidiWindows*>(context);
 
 	std::lock_guard<std::mutex> lock(midi_lib->mutex);
 
 	if (event)
-		return midi_lib->event_queue.pumpEvents(*event);
+		return midi_lib->message_processor.getNextEvent(*event);
 	else
 		return 0;
 }
