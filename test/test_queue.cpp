@@ -8,7 +8,7 @@
 
 using MidiNoteMessage = std::array<uint8_t, 3>;
 
-TEST(Queue, PumpEmpty)
+TEST(Queue, GetNextEmpty)
 {
 	ezmidi::MessageProcessor message_processor;
 
@@ -16,7 +16,7 @@ TEST(Queue, PumpEmpty)
 	ASSERT_EQ(message_processor.getNextEvent(event), 0);
 }
 
-TEST(Queue, Pump)
+TEST(Queue, GetNext)
 {
 	MidiNoteMessage message = { Midi::Status::NoteOnChannel1, 60, 11 };
 
