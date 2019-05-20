@@ -1,5 +1,5 @@
 # ezmidi
-[![Build Status](https://travis-ci.org/matthewcpp/ezmidi.svg?branch=master)](https://travis-ci.org/matthewcpp/ezmidi) [![Build status](https://ci.appveyor.com/api/projects/status/tvrc7il7s82alfgo/branch/master?svg=true)](https://ci.appveyor.com/project/matthewcpp/ezmidi/branch/master)
+[![Build Status](https://travis-ci.org/matthewcpp/ezmidi.svg?branch=master)](https://travis-ci.org/matthewcpp/ezmidi) [![Build status](https://ci.appveyor.com/api/projects/status/tvrc7il7s82alfgo/branch/master?svg=true)](https://ci.appveyor.com/project/matthewcpp/ezmidi/branch/master) [![Documentation Status](https://readthedocs.org/projects/ezmidi/badge/?version=latest)](https://ezmidi.readthedocs.io/en/latest/?badge=latest)
 
 
 Ezmidi is a library for reading messages from a midi controller.  The goal of this project is to create a clean, simple and platform independant API that can easily be used standalone or as a plugin.
@@ -23,6 +23,9 @@ The library should build out of the box without any specific CMake configuration
 The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify `-DCMAKE_SYSTEM_NAME=iOS`.  Aside from the paramters supported by the CMake iOS toolchain, the library does not require any additional switches.
 
 ## Getting Started
+Browse the [Public API Reference](https://ezmidi.readthedocs.io/en/latest/ezmidi_8h.html).
+
+### Sample Usage
 Refer to the sample for your particular platform, but in general usage consists of creating a context, connecting to a source, and then pumping events.  For example:
 
 ```c++
