@@ -1,3 +1,8 @@
+/**
+\file ezmidi.h
+Header file for ezmidi public API
+*/
+
 #ifndef EZ_MIDI_H
 #define EZ_MIDI_H
 
@@ -34,6 +39,7 @@ typedef enum {
 
 /** Enumerates the type of all MIDI events. */
 typedef enum {
+    /** Midi note on/off event */
 	EZMIDI_EVENT_NOTE,
 } Ezmidi_EventType;
 

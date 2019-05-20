@@ -1,0 +1,12 @@
+PROJECT_NAME      = "ezmidi"
+INPUT             = ../README.md ../include/ezmidi/ezmidi.h
+USE_MDFILE_AS_MAINPAGE = ../README.md
+GENERATE_LATEX    = NO
+GENERATE_MAN      = NO
+GENERATE_RTF      = NO
+CASE_SENSE_NAMES  = NO
+GENERATE_HTML     = YES
+OUTPUT_DIRECTORY  = _build
+HTML_OUTPUT       = doxygen
+QUIET             = YES
+WARN_IF_UNDOCUMENTED = NO

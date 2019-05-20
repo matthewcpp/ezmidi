@@ -36,3 +36,6 @@ build
 
 #jetbrains
 .idea
+
+#docs build
+docs/_build/*
