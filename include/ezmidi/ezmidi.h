@@ -65,6 +65,9 @@ typedef struct {
 
 	/** The note's velocity value. */
 	int velocity;
+
+	/** the note's channel. */
+	int channel;
 } Ezmidi_NoteEvent;
 
 /**
