@@ -29,9 +29,11 @@ void MessageProcessor::processNoteEvent(const uint8_t* data)
 	// Note: note on with a velocity of 0 means that the note was released!
 	if (status >= Midi::Status::NoteOnChannel1 && status <= Midi::Status::NoteOnChannel16) {
 		event.note_event.detail = event.note_event.velocity > 0 ? EZMIDI_NOTEEVENT_ON : EZMIDI_NOTEEVENT_OFF;
+		event.note_event.channel = status - Midi::Status::NoteOnChannel1 + 1;
 	}
 	else{
 		event.note_event.detail = EZMIDI_NOTEEVENT_OFF;
+		event.note_event.channel = status - Midi::Status::NoteOffChannel1 + 1;
 	}
 	
 	events_.push(event);
