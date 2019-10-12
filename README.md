@@ -8,7 +8,7 @@ Ezmidi is a library for reading messages from a midi controller.  The goal of th
 1. Windows via [Multimedia API](https://docs.microsoft.com/en-us/windows/desktop/multimedia/musical-instrument-digital-interface--midi)
 1. Linux via [Alsa Raw Midi API](https://www.alsa-project.org/alsa-doc/alsa-lib/rawmidi.html)
 1. MacOS and iOS via [CoreMidi](https://developer.apple.com/documentation/coremidi?language=objc)
-1. Unity via [ezmidi_unity](https://github.com/matthewcpp/ezmidi_unity)
+1. Unity via [EzmidiUnity](https://github.com/matthewcpp/EzmidiUnity)
 
 ## Building 
 
