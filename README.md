@@ -13,8 +13,9 @@ Ezmidi is a library for reading messages from a midi controller.  The goal of th
 ## Building 
 
 ### Dependencies
-CMake 3.14 is reccomended to build ezmidi.  If you are not interested in building iOS you can use CMake 3.11.
-The [Google Test](https://github.com/google/googletest) library is also required, and will be fetched automatically by CMake during project generation.
+CMake 3.14 is reccomended to build ezmidi.  If you are not interested in building iOS you can use CMake 3.11.  
+The [Google Test](https://github.com/google/googletest) library is also required, and will be fetched automatically by CMake during project generation.  
+On linux, you will need development files for alsa.  For ubuntu, these are contained in the `libasound2-dev` package.
 
 ### Building on Windows, Linux, and OSX
 The library should build out of the box without any specific CMake configuration.
