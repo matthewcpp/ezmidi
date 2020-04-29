@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11)
 
 project(ezmidi)
 
+option(TEST_HEADER_ONLY "Test the header only version" OFF)
+
 include(FetchContent)
 find_package(Threads REQUIRED)
 

@@ -33,3 +33,18 @@ source_group(tests FILES ${test_sources})
 
 add_test(NAME test_notes COMMAND ezmidi_test "--gtest_filter=Notes*")
 add_test(NAME test_queue COMMAND ezmidi_test "--gtest_filter=Queue*")
+
+if (TEST_HEADER_ONLY)
+	add_executable(header_only header_only.cpp)
+	target_include_directories(header_only PUBLIC ${CMAKE_BINARY_DIR}/header_only)
+	set_target_properties(header_only PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+
+	if (APPLE)
+		target_link_libraries(header_only PRIVATE "-framework CoreMIDI" "-framework CoreFoundation")
+	elseif(WIN32)
+		target_link_libraries(header_only PRIVATE Winmm.lib)
+	else()
+		target_link_libraries(header_only PRIVATE "-lasound" PUBLIC Threads::Threads)
+	endif()
+
+endif()
