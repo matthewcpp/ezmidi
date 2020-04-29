@@ -6,15 +6,18 @@ Header file for ezmidi public API
 #ifndef EZ_MIDI_H
 #define EZ_MIDI_H
 
+#define EZMIDI_API
+
+//!ignoreheaderonly on
 #ifdef _WIN32
-#    ifdef BUILD_EZMIDI_DLL
-#        define EZMIDI_API __declspec(dllexport)
-#    else
-#        define EZMIDI_API __declspec(dllimport)
-#    endif
-#else
-#    define EZMIDI_API
+	#undef EZMIDI_API
+	#ifdef BUILD_EZMIDI_DLL
+		#define EZMIDI_API __declspec(dllexport)
+	#else
+		#define EZMIDI_API __declspec(dllimport)
+	#endif
 #endif
+//!ignoreheaderonly off
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,7 +66,7 @@ typedef struct {
 	/** The MIDI note number. */
 	int note;
 
-	/** The note's velocity value. */
+	/** The note's velocity value. This value will range between 0 and 127. */
 	int velocity;
 
 	/** the note's channel. */

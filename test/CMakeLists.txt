@@ -22,7 +22,7 @@ set(ezmidi_sources
 
 add_executable(ezmidi_test ${gtest_sources} ${test_sources} ${ezmidi_sources})
 
-set_property(TARGET ezmidi_test PROPERTY CXX_STANDARD 11)
+set_target_properties(ezmidi_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 target_include_directories(ezmidi_test SYSTEM PUBLIC ${googletest_SOURCE_DIR}/googletest/include ${googletest_SOURCE_DIR}/googletest)
 target_include_directories(ezmidi_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 target_link_libraries(ezmidi_test PUBLIC Threads::Threads)

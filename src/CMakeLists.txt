@@ -1,10 +1,7 @@
-set(include_directory ${CMAKE_CURRENT_SOURCE_DIR}/../include/ezmidi)
-
 set(ezmidi_source
-	${include_directory}/ezmidi.h
-    ${include_directory}/private/midi.h
-    ${include_directory}/private/message_processor.h 
-	
+	../include/ezmidi/ezmidi.h
+	midi.h
+	message_processor.h 
 	message_processor.cpp 
 	common.cpp
 )
@@ -24,14 +21,14 @@ else()
 	add_library(ezmidi SHARED ${ezmidi_source})
 endif()
 
-set_property(TARGET ezmidi PROPERTY CXX_STANDARD 11)
+set_target_properties(ezmidi PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 target_include_directories(ezmidi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 if (APPLE)
-	target_link_libraries(ezmidi PUBLIC "-framework CoreMIDI" "-framework CoreFoundation")
+	target_link_libraries(ezmidi PRIVATE "-framework CoreMIDI" "-framework CoreFoundation")
 elseif(WIN32)
-	target_link_libraries(ezmidi PUBLIC Winmm.lib)
-    target_compile_definitions(ezmidi PRIVATE BUILD_EZMIDI_DLL)
+	target_link_libraries(ezmidi PRIVATE Winmm.lib)
+	target_compile_definitions(ezmidi PRIVATE BUILD_EZMIDI_DLL)
 else()
-	target_link_libraries(ezmidi PUBLIC "-lasound" Threads::Threads)
+	target_link_libraries(ezmidi PRIVATE "-lasound" PUBLIC Threads::Threads)
 endif()
