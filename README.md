@@ -21,7 +21,16 @@ On linux, you will need development files for alsa.  For ubuntu, these are conta
 The library should build out of the box without any specific CMake configuration.
 
 ### Building on iOS
-The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify `-DCMAKE_SYSTEM_NAME=iOS`.  Aside from the paramters supported by the CMake iOS toolchain, the library does not require any additional switches.
+The iOS build makes use of the [CMake IOS Toolchain](https://cmake.org/cmake/help/v3.14/manual/cmake-toolchains.7.html).  The build has been tested using the XCode generator.  Ensure that when you invoke cmake to configure and generate the project you specify `-DCMAKE_SYSTEM_NAME=iOS`.  Aside from the parameters supported by the CMake iOS toolchain, the library does not require any additional switches.
+
+### Header only mode
+The library can be built as a single c++ header file using the `make_header_only.py` script.
+To use the library in this mode you will need to define the `EZMIDI_IMPLEMENTATION` macro in a single .cpp file before including the header as illustrated below:
+
+```c++
+#define EZMIDI_IMPLEMENTATION
+#include "ezmidi/ezmidi.hpp"
+```
 
 ## Getting Started
 Browse the [Public API Reference](https://ezmidi.readthedocs.io/en/latest/ezmidi_8h.html).

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_MESSAGE_PROCESSOR_H
+#define EZMIDI_MESSAGE_PROCESSOR_H
 
 #include "ezmidi/ezmidi.h"
 
@@ -27,3 +28,5 @@ private:
 };
 	
 }
+
+#endif

@@ -1,5 +1,5 @@
 #include "ezmidi/ezmidi.h"
-#include "ezmidi/private/message_processor.h"
+#include "message_processor.h"
 
 #include <windows.h>
 

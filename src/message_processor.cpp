@@ -1,5 +1,5 @@
-#include "ezmidi/private/message_processor.h"
-#include "ezmidi/private/midi.h"
+#include "message_processor.h"
+#include "midi.h"
 
 namespace ezmidi {
     

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EZMIDI_MIDI_H
+#define EZMIDI_MIDI_H
 
 namespace Midi {
 
@@ -21,3 +22,5 @@ inline bool isNoteEvent(int status) {
 }
 
 }
+
+#endif

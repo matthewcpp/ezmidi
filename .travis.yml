@@ -2,8 +2,10 @@ language: cpp
 
 before_script:
   - mkdir build
+  - mkdir -p build/header_only/ezmidi
+  - python scripts/make_header_only.py build/header_only/ezmidi/ezmidi.hpp
   - cd build
-  - cmake ..
+  - cmake .. -DTEST_HEADER_ONLY=ON
 
 script:
   - make && make test
@@ -22,5 +24,4 @@ matrix:
       dist: xenial
       compiler: clang
     - os: osx
-      osx_image: xcode10.2
       compiler: clang
