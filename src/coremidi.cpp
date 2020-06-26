@@ -13,7 +13,7 @@
 // Workaround is to open MIDIMonitor in the background before calling MIDIClientCreate from bundle: https://www.snoize.com/MIDIMonitor/
 
 struct EzmidiCoreMidi {
-	MIDIClientRef midi_client = NULL;
+	MIDIClientRef midi_client = 0;
 	ezmidi::MessageProcessor message_processor;
     std::string return_data;
     Ezmidi_Config config;
@@ -42,7 +42,7 @@ Ezmidi_Error close_existing_connection(EzmidiCoreMidi* coremidi)
 		}
 
 		MIDIClientDispose(coremidi->midi_client);
-		coremidi->midi_client = NULL;
+		coremidi->midi_client = 0;
 
 		return EZMIDI_ERROR_NONE;
 	}
@@ -160,7 +160,7 @@ Ezmidi_Error ezmidi_connect_source(Ezmidi_Context* context, int source)
         return coremidi_error(coremidi, "MIDIClientCreate", error, EZMIDI_ERROR_CONNECTION_FAILED);
     }
     
-	MIDIPortRef midi_port = NULL;
+	MIDIPortRef midi_port = 0;
     error = MIDIInputPortCreate(coremidi->midi_client, CFSTR("coremidi_port"), midiReadProc, coremidi, &midi_port);
     if (error) {
         return coremidi_error(coremidi, "MIDIInputPortCreate", error, EZMIDI_ERROR_CONNECTION_FAILED);
